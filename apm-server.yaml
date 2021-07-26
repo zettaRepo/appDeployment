@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: apm-server
+spec:
+  selector:
+    matchLabels: 
+      app: apm-server
+  replicas: 1
+  template:
+    metadata:
+      name: apm-server
+      labels:
+        app: apm-server
+    spec:
+      containers:
+      - name: apm-server
+        image: docker.elastic.co/apm/apm-server:7.13.2
+        env:
+         - name: "STORAGE_TYPE"
+           value: "elasticsearch"
+         - name: "ES_HOST"
+           value: "127.0.0.1:9200"
+         - name: "kibana_HOST"
+           value: "127.0.0.1:5601"
+        ports:
+        - name: apm-server-8200
+          containerPort: 8200
+        imagePullPolicy: Always
+     
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: apm-server
+  labels: 
+    app: apm-server
+spec:
+  type: NodePort
+  ports:
+  - name: apm-server-8200
+    port: 8200
+  selector:
+    app: apm-server
+---
